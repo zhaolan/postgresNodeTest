@@ -4,6 +4,10 @@ var pg = require('pg');
 var bodyParser = require('body-parser');
 var jsonParser = bodyParser.json();
 
+app.get('/hello', function (req, res) {
+    res.send("hello")
+})
+
 app.get('/titles', function (req, res) {
 	get().then((results) => {
 		res.send(results)
