@@ -34,33 +34,35 @@ var config = {
   idleTimeoutMillis: 30000, // how long a client is allowed to remain idle before being closed
 };
 
-var pool = new pg.Pool(config);
+var connectURL = process.env.DATABASE_URL || "postgresql://lanzhao@localhost:5432/testheroku";
+pg.defaults.ssl = process.env.SSL || false;
 
+var client = new pg.Client(connectURL);
 
 var insert = (title)=> {
   return new Promise((resolve, reject)=> { 
 
     // connect to our database
-    pool.connect(function (err, client, done) {
+      client.connect(function (err) {
       if (err) throw err;
       console.log("connect success");
-
       // execute a query on our database
-      client.query('INSERT into titles (title) VALUES($1) RETURNING title',
-        [title], function (err, result) {
-          if (err) throw err;
-          // just print the result to the console
-          done();
+      client.query('INSERT into  titles (title) VALUES($1) RETURNING title', [title], (err, res)=> {
+        if (err) throw err;
+        resolve(res.rows);
+        client.end();
 
-          console.log("insert success", result);
-          return resolve(result.rows[0]);
-          // outputs: { name: 'brianc' }
-
-          // disconnect the client
-          client.end(function (err) {
-            if (err) throw err;
-          });
-        });
+      });
+        //.on('row', (row)=>{
+        //  console.log("insert success");
+        //
+        //  resolve(row);
+        //})
+        //.on('end', function() {
+        //  console.log("end success");
+        //
+        //  client.end();
+        //});
     });
   });
 };
@@ -68,28 +70,29 @@ var insert = (title)=> {
 var get = () => {
 	return new Promise((resolve, reject)=> {
     // connect to our database
-    pool.connect(function (err, client, done) {
+    client.connect(function (err) {
       if (err) throw err;
       console.log("connect success");
 
       // execute a query on our database
-      client.query('SELECT * FROM titles',function (err, result) {
-          if (err) throw err;
-          // just print the result to the console
-          done();
+      client.query('SELECT * FROM titles', (err, res)=> {
+        debugger;
+        if (err) throw err;
 
-          console.log("select  success", result);
-          return resolve(result.rows);
-          // outputs: { name: 'brianc' }
-
-          // disconnect the client
-          client.end(function (err) {
-            if (err) throw err;
-          });
-        });
+        resolve(res.rows);
+        client.end();
+      });
+        //.on('row', (row)=>{
+        //  console.log("get success");
+        //  resolve(row);
+        //})
+        //.on('end', function(rows) {
+        //  console.log("end success rows", rows);
+        //  client.end();
+        //});
     });
   });
-}
+};
 
 
 // module.exports = app;
