@@ -35,56 +35,45 @@ var config = {
   host: 'localhost', // Server hosting the postgres database
   port: 5432, //env var: PGPORT
   max: 10, // max number of clients in the pool
-  idleTimeoutMillis: 30000, // how long a client is allowed to remain idle before being closed
+  idleTimeoutMillis: 30000 // how long a client is allowed to remain idle before being closed
 };
 
 var connectURL = process.env.DATABASE_URL || "postgresql://lanzhao@localhost:5432/testheroku";
 pg.defaults.ssl = process.env.SSL || false;
 
+
 var client = new pg.Client(connectURL);
+client.connect();
 
 var insert = (title)=> {
   return new Promise((resolve, reject)=> { 
 
     // connect to our database
-      client.connect(function (err) {
-      if (err) throw err;
+//      client.connect(function (err) {
+//      if (err) throw err;
       console.log("connect success");
       // execute a query on our database
       client.query('INSERT into  titles (title) VALUES($1) RETURNING title', [title], (err, res)=> {
         if (err) throw err;
         resolve(res.rows);
-        client.end();
-
       });
-        //.on('row', (row)=>{
-        //  console.log("insert success");
-        //
-        //  resolve(row);
-        //})
-        //.on('end', function() {
-        //  console.log("end success");
-        //
-        //  client.end();
-        //});
-    });
+
+//    });
   });
 };
 
 var get = () => {
 	return new Promise((resolve, reject)=> {
     // connect to our database
-    client.connect(function (err) {
-      if (err) throw err;
+//    client.connect(function (err) {
+//      if (err) throw err;
       console.log("connect success");
 
       // execute a query on our database
       client.query('SELECT * FROM titles', (err, res)=> {
-        debugger;
         if (err) throw err;
-
         resolve(res.rows);
-        client.end();
+
       });
         //.on('row', (row)=>{
         //  console.log("get success");
@@ -95,7 +84,7 @@ var get = () => {
         //  client.end();
         //});
     });
-  });
+//  });
 };
 
 
